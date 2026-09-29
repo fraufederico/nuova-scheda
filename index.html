@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuova scheda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #e9edf2;
+    --panel: #f6f8fb;
+    --ink: #142033;
+    --muted: #5d6b80;
+    --line: #cdd5e0;
+    --accent: #1f4fd8;
+    --accent-ink: #ffffff;
+    --hover: #dde4ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1724;
+      --panel: #172133;
+      --ink: #e8edf5;
+      --muted: #91a0b7;
+      --line: #2a3850;
+      --accent: #7fa2ff;
+      --accent-ink: #0f1724;
+      --hover: #1f2c43;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: clamp(1.5rem, 6vw, 5rem) clamp(1.25rem, 5vw, 3rem) 4rem;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  main { max-width: 760px; margin: 0 auto; }
+
+  /* Intestazione */
+  .clock {
+    font-family: 'Bricolage Grotesque', 'Instrument Sans', sans-serif;
+    font-weight: 700;
+    font-size: clamp(4rem, 15vw, 8.5rem);
+    line-height: .95;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .greeting {
+    font-family: 'Bricolage Grotesque', 'Instrument Sans', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+  .date { color: var(--muted); }
+
+  /* Ricerca */
+  .search {
+    display: flex; gap: .5rem; align-items: center;
+    margin: 2.5rem 0 3rem;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: .5rem;
+    transition: border-color .15s;
+  }
+  .search:focus-within { border-color: var(--accent); }
+  .search input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font: inherit; font-size: 1.15rem; color: var(--ink); padding: .4rem 0;
+  }
+  .search input::placeholder { color: var(--muted); }
+  .search button {
+    border: 0; background: var(--accent); color: var(--accent-ink);
+    font: inherit; font-weight: 600; padding: .5rem 1.1rem; border-radius: 6px; cursor: pointer;
+  }
+  .search button:hover { filter: brightness(1.1); }
+
+  /* Segnalibri */
+  h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: .75rem; }
+  .bookmarks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: .25rem;
+  }
+  .bm {
+    display: flex; flex-direction: column; align-items: center; gap: .55rem;
+    padding: 1rem .5rem .8rem;
+    background: none; border: 0; border-radius: 10px;
+    color: var(--ink); text-decoration: none; font: inherit; font-size: .85rem;
+    cursor: pointer; transition: background .12s;
+  }
+  .bm:hover { background: var(--hover); }
+  .ico { position: relative; width: 34px; height: 34px; }
+  .ico img { width: 100%; height: 100%; object-fit: contain; }
+  .ico .folder {
+    position: absolute; right: -9px; bottom: -6px;
+    width: 18px; height: 18px; padding: 3px;
+    background: var(--accent); color: var(--accent-ink);
+    border-radius: 5px;
+  }
+
+  /* Cartella Classroom */
+  dialog {
+    margin: auto;
+    width: min(520px, calc(100vw - 2rem));
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel);
+    color: var(--ink);
+    padding: 0;
+  }
+  dialog::backdrop { background: rgba(10, 16, 28, .5); }
+  dialog[open] { animation: open .16s ease-out; }
+  @keyframes open { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+  @media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
+
+  .dlg-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; background: var(--panel);
+  }
+  .dlg-head h3 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.2rem; font-weight: 600; }
+  .dlg-head span { color: var(--muted); font-size: .85rem; }
+  .close {
+    border: 0; background: none; color: var(--muted); cursor: pointer;
+    width: 32px; height: 32px; border-radius: 8px; font-size: 1.3rem; line-height: 1;
+  }
+  .close:hover { background: var(--hover); color: var(--ink); }
+  .group { padding: .9rem .75rem .5rem; }
+  .group + .group { border-top: 1px solid var(--line); }
+  .group h4 { font-size: .85rem; font-weight: 500; color: var(--muted); padding: 0 .5rem .4rem; }
+  .course {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .6rem .5rem; border-radius: 8px;
+    color: var(--ink); text-decoration: none;
+  }
+  .course:hover { background: var(--hover); }
+  .course .tag {
+    flex: none; width: 30px; height: 30px; border-radius: 8px;
+    display: grid; place-items: center;
+    font-weight: 600; font-size: .85rem; color: #fff;
+  }
+  .course .name { flex: 1; font-weight: 500; }
+
+  .foot { padding: .75rem 1.25rem 1rem; border-top: 1px solid var(--line); }
+  .foot a { color: var(--accent); font-weight: 500; text-decoration: none; }
+  .foot a:hover { text-decoration: underline; }
+
+  /* Chiavetta USB */
+  .ico .usb-svg { width: 100%; height: 100%; color: var(--accent); }
+  .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; padding: .6rem 1rem; border-bottom: 1px solid var(--line); font-size: .85rem; }
+  .crumbs button { border: 0; background: none; font: inherit; color: var(--accent); cursor: pointer; padding: .15rem .35rem; border-radius: 6px; }
+  .crumbs button:hover { background: var(--hover); }
+  .crumbs button:last-child { color: var(--ink); font-weight: 600; cursor: default; }
+  .crumbs i { color: var(--muted); font-style: normal; }
+  .files { padding: .5rem .75rem; }
+  .file {
+    display: flex; align-items: center; gap: .7rem; width: 100%;
+    border: 0; background: none; font: inherit; color: var(--ink); text-align: left;
+    padding: .5rem; border-radius: 8px; cursor: pointer;
+  }
+  .file:hover { background: var(--hover); }
+  .file svg { flex: none; width: 20px; height: 20px; color: var(--muted); }
+  .file.dir svg { color: var(--accent); }
+  .file .fn { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file .fs { color: var(--muted); font-size: .8rem; }
+  .usb-empty { padding: 1.75rem 1.25rem; display: grid; gap: .9rem; justify-items: start; }
+  .usb-empty p { color: var(--muted); max-width: 42ch; }
+  .btn { border: 0; background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 600; padding: .55rem 1.1rem; border-radius: 6px; cursor: pointer; }
+  .btn.ghost { background: none; color: var(--accent); padding-left: 0; }
+  .btn:hover { filter: brightness(1.1); }
+
+  .logout { margin-top: 3.5rem; text-align: right; }
+  .logout a { color: var(--muted); font-size: .85rem; }
+  .logout a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="clock" id="clock">00:00</div>
+    <div class="greeting" id="greeting">Ciao, Federico</div>
+    <div class="date" id="date"></div>
+  </header>
+
+  <form class="search" id="search" role="search">
+    <input type="text" id="q" placeholder="Cerca su Google" autocomplete="off" aria-label="Cerca su Google">
+    <button type="submit">Cerca</button>
+  </form>
+
+  <h2>Segnalibri</h2>
+  <nav class="bookmarks" aria-label="Segnalibri">
+    <button class="bm" id="open-classroom" type="button" aria-haspopup="dialog">
+      <span class="ico">
+        <img src="https://www.gstatic.com/classroom/logo_square_48.svg" alt="">
+        <svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </span>
+      Classroom
+    </button>
+    <button class="bm" id="open-usb" type="button" aria-haspopup="dialog">
+      <span class="ico"><svg class="usb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="7" rx="1.5"/><path d="M9.5 5.5h.01M14.5 5.5h.01"/><path d="M6 9h12v10a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/></svg></span>
+      Chiavetta USB
+    </button>
+    <a class="bm" href="https://mail.google.com" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/gmail_48dp.png" alt=""></span>Gmail</a>
+    <a class="bm" href="https://drive.google.com" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png" alt=""></span>Drive</a>
+    <a class="bm" href="https://docs.google.com/document" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/docs_48dp.png" alt=""></span>Docs</a>
+    <a class="bm" href="https://docs.google.com/presentation" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/slides_48dp.png" alt=""></span>Slides</a>
+    <a class="bm" href="https://docs.google.com/spreadsheets" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/sheets_48dp.png" alt=""></span>Sheets</a>
+    <a class="bm" href="https://calendar.google.com" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/calendar_48dp.png" alt=""></span>Calendar</a>
+    <a class="bm" href="https://translate.google.com" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/translate_48dp.png" alt=""></span>Translate</a>
+    <a class="bm" href="https://meet.google.com" target="_blank" rel="noopener"><span class="ico"><img src="https://www.gstatic.com/images/branding/product/2x/meet_2020q4_48dp.png" alt=""></span>Meet</a>
+    <a class="bm" href="https://www.wikipedia.org" target="_blank" rel="noopener"><span class="ico"><img src="https://www.wikipedia.org/static/favicon/wikipedia.ico" alt=""></span>Wikipedia</a>
+    <a class="bm" href="https://chatgpt.com" target="_blank" rel="noopener"><span class="ico"><img src="https://cdn.oaistatic.com/assets/favicon-o20kmmos.svg" alt=""></span>ChatGPT</a>
+  </nav>
+
+  <div class="logout"><a href="https://accounts.google.com/Logout" target="_blank" rel="noopener">Esci da Google</a></div>
+</main>
+
+<dialog id="classroom" aria-labelledby="cr-title">
+  <div class="dlg-head">
+    <div>
+      <h3 id="cr-title">Classroom</h3>
+      <span>Classe 4F</span>
+    </div>
+    <button class="close" type="button" id="close-classroom" aria-label="Chiudi">&times;</button>
+  </div>
+  <div id="cr-body"></div>
+  <div class="foot"><a href="https://classroom.google.com" target="_blank" rel="noopener">Apri la home di Classroom</a></div>
+</dialog>
+
+<dialog id="usb" aria-labelledby="usb-title">
+  <div class="dlg-head">
+    <div>
+      <h3 id="usb-title">Chiavetta USB</h3>
+      <span>I file restano sul tuo computer</span>
+    </div>
+    <button class="close" type="button" id="close-usb" aria-label="Chiudi">&times;</button>
+  </div>
+  <nav class="crumbs" id="crumbs" aria-label="Percorso" hidden></nav>
+  <div id="usb-body"></div>
+</dialog>
+
+<script>
+  // Corsi Classroom: modifica qui per aggiungere o togliere gruppi
+  const GROUPS = [
+    { title: 'Materie', items: [
+      ['Sistemi e reti', 'https://classroom.google.com/c/ODg2NTE3MzcyNDM2', '#1f4fd8'],
+      ['Tecnologie e progettazione dei sistemi informatici', 'https://classroom.google.com/c/ODg1NjA0ODQzNTAy', '#0f766e'],
+      ['Informatica', 'https://classroom.google.com/c/NzEyODAxODEwODM2', '#6d28d9'],
+      ['Italiano', 'https://classroom.google.com/c/NzE0MDk4Nzc1MzAx', '#b45309'],
+      ['Storia', 'https://classroom.google.com/c/NzE5OTIwNzk2NTM5', '#9f1239'],
+      ['Inglese', 'https://classroom.google.com/c/NzE0MjEyNTY5ODI4', '#0369a1'],
+      ['Religione', 'https://classroom.google.com/c/ODA5NzA5NTA0NzMw', '#4d7c0f']
+    ]},
+    { title: 'Scuola', items: [
+      ['Comunicazioni studenti 4F', 'https://classroom.google.com/c/ODQ2NTgyNzEwMjMx', '#475569'],
+      ['Giornale scolastico', 'https://classroom.google.com/c/NjgwOTk5NzA3NzE5', '#be185d']
+    ]}
+  ];
+
+  const body = document.getElementById('cr-body');
+  GROUPS.forEach(g => {
+    const sec = document.createElement('section');
+    sec.className = 'group';
+    const h = document.createElement('h4');
+    h.textContent = g.title;
+    sec.appendChild(h);
+    g.items.forEach(([name, url, color]) => {
+      const a = document.createElement('a');
+      a.className = 'course';
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      const tag = document.createElement('span');
+      tag.className = 'tag'; tag.style.background = color; tag.textContent = name[0];
+      const label = document.createElement('span');
+      label.className = 'name'; label.textContent = name;
+      a.append(tag, label);
+      sec.appendChild(a);
+    });
+    body.appendChild(sec);
+  });
+
+  const dlg = document.getElementById('classroom');
+  document.getElementById('open-classroom').addEventListener('click', () => dlg.showModal());
+  document.getElementById('close-classroom').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+  // Orologio e saluto
+  const days = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+  const months = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  function tick() {
+    const n = new Date(), h = n.getHours();
+    document.getElementById('clock').textContent =
+      String(h).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
+    document.getElementById('greeting').textContent =
+      (h < 6 ? 'Buonanotte' : h < 13 ? 'Buongiorno' : h < 18 ? 'Buon pomeriggio' : 'Buonasera') + ', Federico';
+    document.getElementById('date').textContent =
+      days[n.getDay()] + ' ' + n.getDate() + ' ' + months[n.getMonth()] + ' ' + n.getFullYear();
+  }
+  tick();
+  setInterval(tick, 5000);
+
+  // ── Chiavetta USB (File System Access API: Chrome, Edge, Brave, Opera) ──
+  const usbDlg = document.getElementById('usb');
+  const usbBody = document.getElementById('usb-body');
+  const crumbsEl = document.getElementById('crumbs');
+  let stack = [];
+
+  function idb() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('nuova-scheda', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('h');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  }
+  async function saveHandle(h) {
+    try { const db = await idb(); db.transaction('h', 'readwrite').objectStore('h').put(h, 'usb'); } catch (e) {}
+  }
+  async function loadHandle() {
+    try {
+      const db = await idb();
+      return await new Promise(res => {
+        const r = db.transaction('h').objectStore('h').get('usb');
+        r.onsuccess = () => res(r.result || null);
+        r.onerror = () => res(null);
+      });
+    } catch (e) { return null; }
+  }
+
+  const SVG_DIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  const SVG_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+
+  function message(text, buttons) {
+    crumbsEl.hidden = true;
+    usbBody.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'usb-empty';
+    const p = document.createElement('p');
+    p.textContent = text;
+    box.appendChild(p);
+    (buttons || []).forEach(([label, fn, ghost]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn' + (ghost ? ' ghost' : ''); b.textContent = label;
+      b.addEventListener('click', fn);
+      box.appendChild(b);
+    });
+    usbBody.appendChild(box);
+  }
+
+  async function showStart() {
+    if (!('showDirectoryPicker' in window)) {
+      message('Questo browser non può leggere le cartelle del computer. Usa Chrome, Edge, Brave od Opera.');
+      return;
+    }
+    const saved = await loadHandle();
+    const buttons = [];
+    if (saved) buttons.push(['Riapri “' + saved.name + '”', () => reconnect(saved)]);
+    buttons.push([saved ? 'Scegli un’altra cartella' : 'Scegli la chiavetta', pick, !!saved]);
+    message(
+      saved
+        ? 'Il browser chiede il permesso di nuovo a ogni sessione. Con la chiavetta inserita, riapri la cartella usata l’ultima volta.'
+        : 'Inserisci la chiavetta, poi scegli la sua cartella (o una cartella al suo interno) per vederne i file.',
+      buttons
+    );
+  }
+
+  async function pick() {
+    try {
+      const h = await window.showDirectoryPicker({ mode: 'read' });
+      saveHandle(h);
+      start(h);
+    } catch (e) {
+      if (e.name !== 'AbortError') message('Il browser non ha permesso di aprire questa cartella. Se hai scelto l’intera unità, prova con una cartella al suo interno.', [['Riprova', pick]]);
+    }
+  }
+  async function reconnect(h) {
+    try {
+      if ((await h.requestPermission({ mode: 'read' })) === 'granted') start(h);
+      else showStart();
+    } catch (e) { message('La chiavetta non è più raggiungibile. Controlla che sia inserita.', [['Scegli la chiavetta', pick]]); }
+  }
+
+  function start(h) { stack = [{ name: h.name || 'USB', handle: h }]; render(); }
+
+  function fmtSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return Math.round(b / 1024) + ' KB';
+    if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+    return (b / 1073741824).toFixed(1) + ' GB';
+  }
+
+  async function render() {
+    crumbsEl.hidden = false;
+    crumbsEl.innerHTML = '';
+    stack.forEach((s, i) => {
+      if (i) { const sep = document.createElement('i'); sep.textContent = '/'; crumbsEl.appendChild(sep); }
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = s.name;
+      b.addEventListener('click', () => { if (i < stack.length - 1) { stack = stack.slice(0, i + 1); render(); } });
+      crumbsEl.appendChild(b);
+    });
+
+    const cur = stack[stack.length - 1].handle;
+    const dirs = [], files = [];
+    try {
+      for await (const [name, h] of cur.entries()) (h.kind === 'directory' ? dirs : files).push([name, h]);
+    } catch (e) {
+      message('Non riesco a leggere questa cartella. Controlla che la chiavetta sia inserita.', [['Ricomincia', showStart]]);
+      return;
+    }
+    const byName = (a, b) => a[0].localeCompare(b[0], 'it', { numeric: true, sensitivity: 'base' });
+    dirs.sort(byName); files.sort(byName);
+
+    usbBody.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'files';
+    if (!dirs.length && !files.length) {
+      const p = document.createElement('p');
+      p.className = 'usb-empty'; p.textContent = 'Questa cartella è vuota.';
+      list.appendChild(p);
+    }
+    dirs.forEach(([name, h]) => list.appendChild(row(name, h, true)));
+    files.forEach(([name, h]) => list.appendChild(row(name, h, false)));
+    usbBody.appendChild(list);
+  }
+
+  function row(name, h, isDir) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'file' + (isDir ? ' dir' : '');
+    b.innerHTML = isDir ? SVG_DIR : SVG_FILE;
+    const n = document.createElement('span');
+    n.className = 'fn'; n.textContent = name;
+    b.appendChild(n);
+    if (isDir) b.addEventListener('click', () => { stack.push({ name, handle: h }); render(); });
+    else b.addEventListener('click', () => openFile(h, b));
+    return b;
+  }
+
+  async function openFile(h, btn) {
+    const w = window.open('', '_blank'); // aperta subito per non essere bloccata dal browser
+    try {
+      const f = await h.getFile();
+      const size = document.createElement('span');
+      size.className = 'fs'; size.textContent = fmtSize(f.size);
+      if (!btn.querySelector('.fs')) btn.appendChild(size);
+      const url = URL.createObjectURL(f);
+      const viewable = /^(image|video|audio|text)\//.test(f.type) || f.type === 'application/pdf';
+      if (viewable && w) {
+        w.location = url;
+      } else {
+        // Word, Excel, zip e simili: il browser non li mostra, quindi li scarica
+        if (w) w.close();
+        const a = document.createElement('a');
+        a.href = url; a.download = f.name; a.click();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
+    } catch (e) {
+      if (w) w.close();
+      message('Non riesco ad aprire il file. La chiavetta è ancora inserita?', [['Ricomincia', showStart]]);
+    }
+  }
+
+  document.getElementById('open-usb').addEventListener('click', () => {
+    usbDlg.showModal();
+    if (stack.length) render(); else showStart();
+  });
+  document.getElementById('close-usb').addEventListener('click', () => usbDlg.close());
+  usbDlg.addEventListener('click', e => { if (e.target === usbDlg) usbDlg.close(); });
+
+  // Ricerca
+  document.getElementById('search').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('q');
+    const q = input.value.trim();
+    if (q) { window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank'); input.value = ''; }
+  });
+</script>
+</body>
+</html>
